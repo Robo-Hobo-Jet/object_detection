@@ -19,8 +19,6 @@ services:
     environment:
       NVIDIA_VISIBLE_DEVICES: all
       NVIDIA_DRIVER_CAPABILITIES: all
-      # DISPLAY: ${DISPLAY}
-      # WAYLAND_DISPLAY: ${WAYLAND_DISPLAY}
       XDG_RUNTIME_DIR: ${XDG_RUNTIME_DIR}
       PULSE_SERVER: ${PULSE_SERVER}
       LIBGL_ALWAYS_SOFTWARE: "1"
@@ -30,8 +28,4 @@ services:
       - /tmp/.X11-unix:/tmp/.X11-unix
       - ../..:/workspaces:cached
 
-    # stdin_open: true
-    # tty: true
     command: ["bash", "/workspaces/object_detection/entrypoint_yolov8.sh"]
-    # command: /workspace/entrypoint_yolov8.sh
-    restart: always
