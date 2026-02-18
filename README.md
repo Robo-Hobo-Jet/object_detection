@@ -17,7 +17,7 @@ The container is controlled entirely through environment variables in docker-com
 
 Build and run the container
 ```bash
-docker compose build
+docker compose up --build
 ```
 The entrypoint will:
 
