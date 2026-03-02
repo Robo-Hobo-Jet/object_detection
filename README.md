@@ -47,6 +47,16 @@ Choose how the container launches:
 
     multi → detection only, expects another container to provide camera topics
 
+VIS_MODE
+
+Select the mode for visualization
+
+    sparse displays only persons, dogs and potted plants
+
+    full displays all 68 classes
+
+The node still publishes all found classes, this is only for the visualization purposes
+
 Example:
 yaml
 
@@ -55,6 +65,7 @@ services:
     environment:
       YOLO_MODEL: yolov8s
       RUN_MODE: standalone
+      VIS_MODE: sparse
 
 
 ## 📁 Asset Management

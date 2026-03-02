@@ -4,10 +4,12 @@ set -e
 # Source ROS environments
 source /opt/ros/humble/setup.bash
 source /opt/ros_ws/install/setup.bash
+source ${ISAAC_ROS_WS}/install/setup.bash
 
 # Read model + mode from environment
 YOLO_MODEL="${YOLO_MODEL:-yolov8s}"      # default model
 RUN_MODE="${RUN_MODE:-standalone}"       # default mode (standalone or composite)
+VIS_MODE="${VIS_MODE:-sparse}"           # default sparse mode
 
 ASSETS_BASE="${ISAAC_ROS_WS}/isaac_ros_assets/models/yolov8"
 ONNX_FILE="${ASSETS_BASE}/${YOLO_MODEL}.onnx"
@@ -53,7 +55,11 @@ if [ "$RUN_MODE" = "standalone" ]; then
         engine_file_path:=${ENGINE_FILE} \
         interface_specs_file:=${ISAAC_ROS_WS}/realsense_specs.json &
 
-    ros2 run isaac_ros_yolov8 isaac_ros_yolov8_visualizer.py &
+    if [ "$VIS_MODE" = "sparse" ]; then
+        ros2 run object_detection yolov8_sparse_visualizer &
+    else
+        ros2 run isaac_ros_yolov8 isaac_ros_yolov8_visualizer.py &
+    fi
 
     ros2 run image_transport republish raw compressed \
         --ros-args \
@@ -73,14 +79,19 @@ if [ "$RUN_MODE" = "composite" ]; then
     ros2 launch isaac_ros_examples isaac_ros_examples.launch.py \
         launch_fragments:=yolov8 \
         model_file_path:=${ONNX_FILE} \
-        engine_file_path:=${ENGINE_FILE} &
+        engine_file_path:=${ENGINE_FILE}  \
+        interface_specs_file:=${ISAAC_ROS_WS}/realsense_specs.json &
 
-    ros2 run isaac_ros_yolov8 isaac_ros_yolov8_visualizer.py &
+    if [ "$VIS_MODE" = "sparse" ]; then
+        ros2 run object_detection yolov8_sparse_visualizer &
+    else
+        ros2 run isaac_ros_yolov8 isaac_ros_yolov8_visualizer.py &
+    fi
 
     ros2 run image_transport republish raw compressed \
         --ros-args \
-        -r in:=/yolov8_processed_image \
-        -r out:=/yolov8_processed_image \
+        --remap in:=/yolov8_processed_image \
+        --remap /out/compressed:=/yolov8_processed_image/compressed \
         -p compressed.jpeg_quality:=80
 
     exit 0
